@@ -1,4 +1,5 @@
-ARG FROM_IMAGE_NAME=rocm/pytorch:rocm3.3_ubuntu16.04_py3.6_pytorch
+ARG FROM_IMAGE_NAME=rocm/pytorch-private:rocm3.5_ubuntu16.04_py3.6_pytorch_rocblas_bert_fp16_tuned
+
 FROM ${FROM_IMAGE_NAME}
 RUN apt-get update && apt-get install -y pbzip2 pv bzip2 cabextract
 
@@ -10,9 +11,10 @@ RUN git clone https://github.com/soskek/bookcorpus.git
 
 WORKDIR /workspace/bert
 RUN pip3.6 install --no-cache-dir \
- tqdm boto3 requests six ipdb h5py html2text nltk progressbar onnxruntime\
+ tqdm boto3 requests six ipdb h5py html2text nltk progressbar onnxruntime \
  git+https://github.com/NVIDIA/dllogger
 
 RUN apt-get install -y iputils-ping
 
 COPY . .
+
