@@ -1,2 +1,2 @@
 #!/bin/bash
-docker build --network=host Dockerfile_nv . --rm --pull --no-cache -t bert_nv
+sudo docker build --network=host -f Dockerfile_nv . --rm --pull --no-cache -t bert_nv
