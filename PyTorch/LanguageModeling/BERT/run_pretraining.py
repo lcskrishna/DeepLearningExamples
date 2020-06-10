@@ -40,11 +40,13 @@ import multiprocessing
 from tokenization import BertTokenizer
 import modeling
 from apex.optimizers import FusedLAMB
+from apex.optimizers import FusedAdam
 from schedulers import PolyWarmUpScheduler
 
 from file_utils import PYTORCH_PRETRAINED_BERT_CACHE
 from utils import is_main_process, format_step, get_world_size, get_rank
 from apex.parallel import DistributedDataParallel as DDP
+#from torch.nn.parallel import DistributedDataParallel as DDP
 from schedulers import LinearWarmUpScheduler
 from apex.parallel.distributed import flat_dist_call
 import amp_C
@@ -369,8 +371,11 @@ def prepare_model_and_optimizer(args, device):
         {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], 'weight_decay': 0.01},
         {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}]
 
-    optimizer = FusedLAMB(optimizer_grouped_parameters, 
-                          lr=args.learning_rate)
+    #optimizer = FusedLAMB(optimizer_grouped_parameters, 
+    #                      lr=args.learning_rate)
+    optimizer = FusedAdam(optimizer_grouped_parameters,
+                                  lr=args.learning_rate,
+                                  bias_correction=False)
     lr_scheduler = PolyWarmUpScheduler(optimizer, 
                                        warmup=args.warmup_proportion, 
                                        total_steps=args.max_steps)
@@ -378,8 +383,10 @@ def prepare_model_and_optimizer(args, device):
 
         if args.loss_scale == 0:
             model, optimizer = amp.initialize(model, optimizer, opt_level="O2", loss_scale="dynamic", cast_model_outputs=torch.float16)
+            #model, optimizer = amp.initialize(model, optimizer, opt_level="O2", loss_scale=32768.0, cast_model_outputs=torch.float16)
         else:
             model, optimizer = amp.initialize(model, optimizer, opt_level="O2", loss_scale=args.loss_scale, cast_model_outputs=torch.float16)
+            #model, optimizer = amp.initialize(model, optimizer, opt_level="O2", loss_scale=32768.0, cast_model_outputs=torch.float16)
         amp._amp_state.loss_scalers[0]._loss_scale = args.init_loss_scale
 
     model.checkpoint_activations(args.checkpoint_activations)
@@ -408,6 +415,7 @@ def prepare_model_and_optimizer(args, device):
     if args.local_rank != -1:
         if not args.allreduce_post_accumulation:
             model = DDP(model, message_size=250000000, gradient_predivide_factor=get_world_size())
+            #model = DDP(model)
         else:
             flat_dist_call([param.data for param in model.parameters()], torch.distributed.broadcast, (0,) )
     elif args.n_gpu > 1:
