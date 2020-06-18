@@ -18,3 +18,6 @@ sh benchmark-scripts/nv/get_final_results.sh 14 |& tee seq512-bs14-perf
 
 sh benchmark-scripts/nv/run_benchmarks.sh 16 512
 sh benchmark-scripts/nv/get_final_results.sh 16 |& tee seq512-bs16-perf
+
+sh benchmark-scripts/nv/run_benchmarks.sh 18 512
+sh benchmark-scripts/nv/get_final_results.sh 18 |& tee seq512-bs18-perf
