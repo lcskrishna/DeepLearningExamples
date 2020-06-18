@@ -17,6 +17,7 @@ echo "Container nvidia build = " $NVIDIA_BUILD_ID
 export HSA_FORCE_FINE_GRAIN_PCIE=1
 
 NUM_GPUS=${NUM_GPUS:-1}
+SEQ_LENGTH=${SEQ_LENGTH:-128}
 train_batch_size=${BATCH_SIZE:-24}
 learning_rate=${2:-"6e-3"}
 precision=${3:-"fp16"}
@@ -40,7 +41,9 @@ warmup_proportion_phase2=${19:-"0.128"}
 train_steps_phase2=${20:-200}
 gradient_accumulation_steps_phase2=${21:-1}
 #DATASET=hdf5_lower_case_1_seq_len_128_max_pred_20_masked_lm_prob_0.15_random_seed_12345_dupe_factor_5_shard_1472_test_split_10/books_wiki_en_corpus/training # change this for other datasets
-DATASET=/data/datasets/wikipedia_bookcorpus_hdf5/hdf5_lower_case_1_seq_len_128_max_pred_20_masked_lm_prob_0.15_random_seed_12345_dupe_factor_5/books_wiki_en_corpus
+#DATASET=/data/datasets/wikipedia_bookcorpus_hdf5/hdf5_lower_case_1_seq_len_128_max_pred_20_masked_lm_prob_0.15_random_seed_12345_dupe_factor_5/books_wiki_en_corpus
+DATASET=/data/datasets/wikipedia_bookcorpus_hdf5/hdf5_lower_case_1_seq_len_${SEQ_LENGTH}_max_pred_$((20*SEQ_LENGTH/128))_masked_lm_prob_0.15_random_seed_12345_dupe_factor_5/books_wiki_en_corpus
+
 DATA_DIR_PHASE1=${22:-${DATASET}/}
 BERT_CONFIG=bert_config.json
 CODEDIR=${24:-"/workspace/bert"}
