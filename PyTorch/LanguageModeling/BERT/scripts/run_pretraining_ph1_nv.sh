@@ -17,7 +17,7 @@ echo "Container nvidia build = " $NVIDIA_BUILD_ID
 export HSA_FORCE_FINE_GRAIN_PCIE=1
 
 NUM_GPUS=${NUM_GPUS:-1}
-train_batch_size=${1:-24}
+train_batch_size=${BATCH_SIZE:-24}
 learning_rate=${2:-"6e-3"}
 precision=${3:-"fp16"}
 num_gpus=${4:-"${NUM_GPUS}"}
