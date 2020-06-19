@@ -274,6 +274,7 @@ def parse_arguments():
                         default=False,
                         action='store_true',
                         help='Disable tqdm progress bar')
+    parser.add_argument('--use-lamb', type=int, default=0, required=False, help='Use LAMBOptimizer')
     args = parser.parse_args()
     
     return args
@@ -371,11 +372,13 @@ def prepare_model_and_optimizer(args, device):
         {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], 'weight_decay': 0.01},
         {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}]
 
-    #optimizer = FusedLAMB(optimizer_grouped_parameters, 
-    #                      lr=args.learning_rate)
-    optimizer = FusedAdam(optimizer_grouped_parameters,
-                                  lr=args.learning_rate,
-                                  bias_correction=False)
+    if args.use_lamb:
+        optimizer = FusedLAMB(optimizer_grouped_parameters, 
+                              lr=args.learning_rate)
+    else:
+        optimizer = FusedAdam(optimizer_grouped_parameters,
+                                      lr=args.learning_rate,
+                                      bias_correction=False)
     lr_scheduler = PolyWarmUpScheduler(optimizer, 
                                        warmup=args.warmup_proportion, 
                                        total_steps=args.max_steps)
