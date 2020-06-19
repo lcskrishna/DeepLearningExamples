@@ -48,6 +48,7 @@ DATA_DIR_PHASE1=${22:-${DATASET}/}
 BERT_CONFIG=bert_config.json
 CODEDIR=${24:-"/workspace/bert"}
 init_checkpoint=${25:-"None"}
+use_lamb=${USE_LAMB:-"0"}
 RESULTS_DIR=$CODEDIR/results
 CHECKPOINTS_DIR=$RESULTS_DIR/checkpoints
 
@@ -106,6 +107,17 @@ if [ "$init_checkpoint" != "None" ] ; then
    INIT_CHECKPOINT="--init_checkpoint=$init_checkpoint"
 fi
 
+OPTIMIZER=""
+if [ "$use_lamb" = "1" ] ; then
+   OPTIMIZER="--use-lamb 1"
+elif [ "$use_lamb" = "0" ] ; then
+   OPTIMIZER=""
+else
+   echo "Unknown <optimizer> argument"
+   exit -2
+fi
+
+
 echo $DATA_DIR_PHASE1
 INPUT_DIR=$DATA_DIR_PHASE1
 CMD=" $CODEDIR/run_pretraining.py"
@@ -122,6 +134,7 @@ CMD+=" --num_steps_per_checkpoint=$save_checkpoint_steps"
 CMD+=" --learning_rate=$learning_rate"
 CMD+=" --seed=$seed"
 CMD+=" $PREC"
+CMD+=" $OPTIMIZER"
 CMD+=" $ACCUMULATE_GRADIENTS"
 CMD+=" $CHECKPOINT"
 CMD+=" $ALL_REDUCE_POST_ACCUMULATION"
