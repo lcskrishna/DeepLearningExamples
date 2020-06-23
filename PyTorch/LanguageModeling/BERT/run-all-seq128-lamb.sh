@@ -1,4 +1,3 @@
-rm *-perf
 sh benchmark-scripts/nv/run_benchmarks.sh 8 128 1
 sh benchmark-scripts/nv/get_final_results.sh 8 |& tee seq128-bs8-perf
 
